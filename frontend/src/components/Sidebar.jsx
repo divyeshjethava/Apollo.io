@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.jpg";
 import {
   Home,
@@ -16,11 +17,11 @@ import {
   Workflow,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 
 export default function Sidebar({ isOpen, setIsOpen }) {
-  
+  const navigate = useNavigate(); // ✅ added
 
   const menuItems = [
     {
@@ -67,11 +68,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       <div className="flex items-center justify-between p-1 border-b">
         {isOpen && (
           <h2 className="font-bold text-lg">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-24 h-24 object-contain"
-            />
+            <img src={logo} alt="Logo" className="w-24 h-24 object-contain" />
           </h2>
         )}
         <button
@@ -85,7 +82,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       {/* Scrollable Menu */}
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent p-2">
         <div className="space-y-4">
-          <div className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer">
+          <div
+            className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
+            onClick={() => navigate("/")}
+          >
             <Home size={18} />
             {isOpen && <span>Home</span>}
           </div>
@@ -100,6 +100,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               {group.items.map((item, idx) => (
                 <div
                   key={idx}
+                  onClick={() => {
+                    if (item.label === "People") navigate("people");
+                    else if (item.label === "Companies") navigate("/companies");
+                    else if (item.label === "Lists") navigate("/lists");
+                  }}
                   className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
                 >
                   {item.icon}
@@ -113,7 +118,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
       {/* Footer */}
       <div className="border-t p-3">
-        <div className="flex items-center space-x-2 hover:bg-gray-100 p-2 rounded-md cursor-pointer">
+        <div
+          className="flex items-center space-x-2 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
+          onClick={() => navigate("/settings")}
+        >
           <Settings size={18} />
           {isOpen && <span>Settings</span>}
         </div>

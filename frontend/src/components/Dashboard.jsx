@@ -1,27 +1,36 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
+import { Outlet } from "react-router-dom";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const sidebarWidthOpen = '16rem';
+  const sidebarWidthClosed = '4rem';
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
-      {/* Sidebar Section */}
+    <div className="flex h-screen w-full overflow-hidden bg-white">
+      {/* Primary Application Sidebar (e.g., General Navigation) */}
+      {/* This component needs to handle its own fixed/absolute positioning */}
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-      {/* Main Dashboard Area */}
+      {/* Main Content Area (Dynamically Sized) */}
       <div
-        className={`flex-1 bg-gray-100 p-6 overflow-auto transition-all duration-300 ${
-          isSidebarOpen ? "ml-0" : "ml-[-12rem]"
-        }`}
+        className={`
+          transition-all duration-300 flex flex-col h-screen overflow-y-auto overflow-x-hidden
+          ${isSidebarOpen 
+            ? `w-[calc(100%-${sidebarWidthOpen})] ml-64` 
+            : `w-[calc(100%-${sidebarWidthClosed})] ml-16`
+          }
+        `}
       >
-        <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
-        <p>Welcome</p>
 
-        {/* Example long content */}
-        <div className="min-h-[2000px] bg-white mt-4 p-4 rounded shadow">
-          Scrollable content here...
-        </div>
+        {/* 1. Scrollable Content Area - Removed padding and gray background. */}
+        <main className="flex-1 text-sm">
+          <div className="bg-white min-h-full w-full">
+            {/* The content from your nested route will render here */}
+            <Outlet />
+          </div>
+        </main>
       </div>
     </div>
   );
