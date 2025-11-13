@@ -102,8 +102,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                   key={idx}
                   onClick={() => {
                     if (item.label === "People") navigate("people");
-                    else if (item.label === "Companies") navigate("/companies");
-                    else if (item.label === "Lists") navigate("/lists");
+                    else if (item.label === "Companies") navigate("company");
+                    else if (item.label === "Lists") navigate("lists");
+                    else if (item.label === "Emails") navigate("email");
+                    else if (item.label === "Data enrichment") navigate("DataEnrichmentPage");
                   }}
                   className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
                 >
