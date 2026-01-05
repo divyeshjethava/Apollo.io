@@ -26,7 +26,10 @@ export default function FilterSidebar() {
     setExpanded((p) => ({ ...p, [key]: !p[key] }))
 
   return (
-    <aside className="w-[290px] h-screen bg-white border-r border-gray-200 overflow-y-auto">
+    <aside className="flex flex-col h-250 bg-white">
+      <div className="w-[290px] h-screen bg-white border-r border-gray-200 overflow-y-auto">
+
+    
       {/* Stats */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex gap-2">
@@ -138,8 +141,12 @@ export default function FilterSidebar() {
         ))}
       </FilterSection>
 
-      {/* Bottom */}
-      <div className="p-4 border-t border-gray-200 flex gap-2">
+      
+     </div>
+      <div className="sticky bottom-0 z-40 bg-white border-t border-gray-200 px-4 py-3 text-sm">
+        <div className="flex items-center justify-between p-4 border-t border-gray-200 gap-2">
+            {/* Bottom */}
+    
         <button className="flex-1 text-sm text-gray-500 hover:text-gray-900">
           Clear all
         </button>
@@ -147,6 +154,8 @@ export default function FilterSidebar() {
           More filters
         </button>
       </div>
+        </div>
+       
     </aside>
   )
 }

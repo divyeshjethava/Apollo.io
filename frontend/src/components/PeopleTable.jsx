@@ -71,7 +71,7 @@ export default function PeopleTable() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-250 bg-white">
       <div className="flex-1 min-h-0 overflow-auto">
         <table className="min-w-[2400px] w-full border-collapse">
           <thead className="sticky top-0 bg-white z-20">
@@ -95,7 +95,7 @@ export default function PeopleTable() {
               </th>
               <th className="px-4 py-3 min-w-[260px]">Company · Industries</th>
               <th className="px-4 py-3 min-w-[260px]">Company · Keywords</th>
-              <th className="sticky right-0 z-50 bg-white px-4 py-3 min-w-[160px] text-right">
+              <th className="fixed right-10 z-50 bg-white px-10 py-4 min-w-[140px] text-right">
                 + Add Column
               </th>
             </tr>
