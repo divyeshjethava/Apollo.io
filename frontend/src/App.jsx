@@ -30,7 +30,7 @@ export default function App() {
   const currentPath =
     location.pathname === "/" ? "home" : location.pathname.substring(1);
 
-  const showNavbar = location.pathname !== '/login';
+  const showNavbar = location.pathname !== "/login";
 
   const handleSidebarNavigation = (viewName) => {
     switch (viewName.toLowerCase()) {
@@ -77,37 +77,40 @@ export default function App() {
   };
 
   return (
-  <div className="flex h-screen bg-gray-50">
-    {showNavbar && <Sidebar
-      isOpen={sidebarOpen}
-      setIsOpen={setSidebarOpen}
-      setCurrentView={handleSidebarNavigation}
-      currentView={currentPath}
-    />}
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {showNavbar && <TopBar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}
-      <main className="flex-1 overflow-auto">
-        <Routes>
-          <Route path="/" element={<WelcomeView />} />
-          <Route path="/data-enrichment" element={<DataEnrichmentView />} />
-          <Route path="/lists" element={<MyListsView />} />
-          <Route path="/people" element={<PeopleView />} />
-          <Route path="/companies" element={<CompaniesView />} />
-          <Route path="/sequence" element={<Sequence />} />
-          <Route path="/emails" element={<Emails />} />
-          <Route path="/calls" element={<Calls />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/meetings" element={<Meetings />} />
-          <Route path="/conversations" element={<Conversations />} />
-          <Route path="/deals" element={<DealsOverview />} />
-          <Route path="/admin/users" element={<UserTeam />} />
-          <Route path="/admin/system-activity" element={<SystemActivity />} />
-          <Route path="*" element={<WelcomeView />} />
-        </Routes>
-      </main>
+    <div className="flex h-screen bg-gray-50">
+      {showNavbar && (
+        <Sidebar
+          isOpen={sidebarOpen}
+          setIsOpen={setSidebarOpen}
+          setCurrentView={handleSidebarNavigation}
+          currentView={currentPath}
+        />
+      )}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {showNavbar && (
+          <TopBar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        )}
+        <main className="flex-1 overflow-auto">
+          <Routes>
+            <Route path="/" element={<WelcomeView />} />
+            <Route path="/data-enrichment" element={<DataEnrichmentView />} />
+            <Route path="/lists" element={<MyListsView />} />
+            <Route path="/people" element={<PeopleView />} />
+            <Route path="/companies" element={<CompaniesView />} />
+            <Route path="/sequence" element={<Sequence />} />
+            <Route path="/emails" element={<Emails />} />
+            <Route path="/calls" element={<Calls />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/meetings" element={<Meetings />} />
+            <Route path="/conversations" element={<Conversations />} />
+            <Route path="/deals" element={<DealsOverview />} />
+            <Route path="/admin/users" element={<UserTeam />} />
+            <Route path="/admin/system-activity" element={<SystemActivity />} />
+            <Route path="*" element={<WelcomeView />} />
+          </Routes>
+        </main>
+      </div>
     </div>
-  </div>
-);
-
+  );
 }
