@@ -3,7 +3,7 @@ import TopBar from "./components/TopBar";
 import DataEnrichmentView from "./components/views/DataEnrichmentView";
 import WelcomeView from "./components/views/WelcomeView";
 import MyListsView from "./components/views/MyListsView";
-import PeopleView from "./components/views/PeopleView";
+import PeopleView from "./components/views/People/PeopleView";
 import CompaniesView from "./components/views/CompaniesView";
 import Sequence from "./components/views/Engage/Sequence/Sequence";
 import Login from "./components/Login";
@@ -19,6 +19,7 @@ import Meetings from "./components/views/WinDeals/Meetings/Meetings";
 import Conversations from "./components/views/WinDeals/Conversations/Conversations";
 // import Deals from "./components/views/WinDeals/Deals/Overview";
 import DealsOverview from "./components/views/WinDeals/Deals/Overview";
+import CreateLeadView from "./components/views/People/CreateLeadView";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -96,6 +97,7 @@ export default function App() {
             <Route path="/data-enrichment" element={<DataEnrichmentView />} />
             <Route path="/lists" element={<MyListsView />} />
             <Route path="/people" element={<PeopleView />} />
+            <Route path="/people/create" element={<CreateLeadView />} />
             <Route path="/companies" element={<CompaniesView />} />
             <Route path="/sequence" element={<Sequence />} />
             <Route path="/emails" element={<Emails />} />

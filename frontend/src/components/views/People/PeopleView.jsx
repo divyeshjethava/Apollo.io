@@ -1,9 +1,12 @@
-import { useState } from "react"
-import { Search, Sparkles } from "lucide-react"
-import FilterSidebar from "../FilterSidebar"
-import PeopleTable from "../PeopleTable"
+import { useState } from "react";
+import { Search, Sparkles } from "lucide-react";
+import FilterSidebar from "../../FilterSidebar";
+import PeopleTable from "../../PeopleTable";
+import { useNavigate } from "react-router-dom";
 
 export default function PeopleView() {
+  const navigate = useNavigate();
+
   return (
     <div className="h-screen flex flex-col bg-white">
       {/* Top Header */}
@@ -25,6 +28,13 @@ export default function PeopleView() {
                 <Search size={16} />
                 Search people
               </div>
+
+              <button
+                className="flex items-center gap-2 px-3 py-1.5 border rounded text-sm cursor-pointer"
+                onClick={() => navigate("/people/create")}
+              >
+                Create lead
+              </button>
             </div>
           </div>
 
@@ -33,9 +43,7 @@ export default function PeopleView() {
               <Sparkles size={16} />
               Research with AI
             </button>
-            <button className="px-4 py-2 border rounded text-sm">
-              Import
-            </button>
+            <button className="px-4 py-2 border rounded text-sm">Import</button>
           </div>
         </div>
       </div>
@@ -53,5 +61,5 @@ export default function PeopleView() {
         </div>
       </div>
     </div>
-  )
+  );
 }
