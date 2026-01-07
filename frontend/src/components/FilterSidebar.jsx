@@ -40,7 +40,7 @@ export default function FilterSidebar() {
             <p className="text-sm font-medium text-gray-900">
               Marketing Leaders
             </p>
-            <p className="text-xs text-gray-500">2 persona matches</p>
+            <p className="text-xs text-gray-500">2 person matches</p>
           </div>
 
           <button className="mt-3 w-full rounded border border-gray-300 text-sm py-2 hover:bg-gray-50">
