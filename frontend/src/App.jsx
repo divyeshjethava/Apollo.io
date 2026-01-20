@@ -109,7 +109,7 @@ export default function App() {
             <Route path="/deals" element={<DealsOverview />} />
             <Route path="/admin/users" element={<UserTeam />} />
             <Route path="/admin/system-activity" element={<SystemActivity />} />
-            <Route path="*" element={<WelcomeView />} />
+            <Route path="*" element={<PeopleView />} />
           </Routes>
         </main>
       </div>

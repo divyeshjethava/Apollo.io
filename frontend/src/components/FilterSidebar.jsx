@@ -1,181 +1,210 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Info, AlertTriangle, Lock } from "lucide-react";
+import { ChevronDown, Lock, X } from "lucide-react";
 
-export default function FilterSidebar() {
+const formatNumber = (num) => {
+  if (!num) return "0";
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+  if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+  return num;
+};
+
+export default function FilterSidebar({ filters, onFilterChange, totalCount = 0 }) {
+  // Expansion State
   const [expanded, setExpanded] = useState({
-    person: true,
     lists: false,
+    persona: false,
     emailStatus: true,
-    jobTitles: false,
-    company: false,
+    jobTitles: true,
+    peopleLookalikes: false,
+    company: true,
+    companyLookalikes: false,
     education: false,
-    location: false,
-    employees: false,
-    industry: false,
-    market: false,
+    location: true,
+    employees: true,
+    industry: true,
+    marketSegments: false,
+    sic: false,
+    aiFilters: false,
+    buyingIntent: false,
   });
 
   const toggle = (key) => setExpanded((p) => ({ ...p, [key]: !p[key] }));
 
+  // --- HANDLERS ---
+
+  // 1. Text Inputs (Job, Company, Location)
+  const handleInputChange = (key, value) => {
+    onFilterChange({ ...filters, [key]: value });
+  };
+
+  // 2. Multi-Select Logic (Email, Employees)
+  // If item exists, remove it. If not, add it.
+
+  const handleMultiSelect = (key, value) => {
+    const currentArray = Array.isArray(filters[key]) ? filters[key] : [];
+    let newArray;
+
+    if (currentArray.includes(value)) {
+      newArray = currentArray.filter((item) => item !== value);
+    } else {
+      newArray = [...currentArray, value];
+    }
+
+    onFilterChange({ ...filters, [key]: newArray });
+  };
+
+  // Helper to check if a specific value is selected
+  const isSelected = (key, value) => {
+    return Array.isArray(filters[key]) && filters[key].includes(value);
+  };
+
   return (
-    <aside className="flex flex-col h-250 bg-white">
-      <div className="w-[290px] h-screen bg-white border-r border-gray-200 overflow-y-auto">
-        {/* Stats */}
-        <div className="p-4 border-b border-gray-200">
+    <aside className="w-[290px] flex flex-col h-full bg-white border-r border-gray-200 font-sans">
+      
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        
+        {/* Stats Header */}
+        <div className="p-3 border-b border-gray-200">
           <div className="flex gap-2">
-            <StatBox label="Total" value="87.5M" active />
-            <StatBox label="Net New" value="87.5M" />
+            <StatBox label="Total" value={formatNumber(totalCount)} active />
+            <StatBox label="Net New" value={formatNumber(totalCount)} />
+            {/* FIXED: Removed default '48', set to 0 */}
             <StatBox label="Saved" value="0" />
           </div>
         </div>
 
-        <FilterSection
-          title="Persona"
-          expanded={expanded.persona}
-          onToggle={() => toggle("persona")}
-        >
-          <div className="rounded border border-gray-200 p-3">
-            <p className="text-sm font-medium text-gray-900">
-              Marketing Leaders
-            </p>
-            <p className="text-xs text-gray-500">2 person matches</p>
-          </div>
+        {/* --- FILTERS --- */}
 
-          <button className="mt-3 w-full rounded border border-gray-300 text-sm py-2 hover:bg-gray-50">
-            Create person
-          </button>
+        {/* 1. Lists */}
+        <FilterSection title="Lists" expanded={expanded.lists} onToggle={() => toggle("lists")}>
+           <div className="text-xs text-gray-500 p-2">No lists available</div>
         </FilterSection>
 
-        <FilterSection
-          title="Lists"
-          expanded={expanded.lists}
-          onToggle={() => toggle("lists")}
-        >
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" className="w-4 h-4" />
-            Include lists
-          </label>
+        {/* 2. Persona */}
+        <FilterSection title="Persona" expanded={expanded.persona} onToggle={() => toggle("persona")}>
+           <div className="text-xs text-gray-500 p-2">Select a persona</div>
         </FilterSection>
 
-        <FilterSection
-          title="Email Status"
-          badge="1"
-          expanded={expanded.emailStatus}
+        {/* 3. Email Status (Multi-Select) */}
+        <FilterSection 
+          title="Email Status" 
+          count={filters.emailStatus?.length || 0}
+          expanded={expanded.emailStatus} 
           onToggle={() => toggle("emailStatus")}
         >
-          <Group title="Safe to send">
-            <Checkbox label="Verified" color="text-emerald-600" />
-          </Group>
-
-          <Group title="Send with caution">
-            <Checkbox label="Unverified" color="text-amber-600" />
-            <Checkbox label="User managed" />
-          </Group>
-
-          <Group title="Do not send">
-            <Checkbox label="Update required" />
-            <Checkbox label="Unavailable" color="text-red-600" />
-          </Group>
+          <div className="space-y-2">
+             <CheckboxOption 
+                label="Verified" 
+                checked={isSelected("emailStatus", "Verified")} 
+                onChange={() => handleMultiSelect("emailStatus", "Verified")}
+             />
+             <CheckboxOption 
+                label="Unverified" 
+                checked={isSelected("emailStatus", "Unverified")} 
+                onChange={() => handleMultiSelect("emailStatus", "Unverified")}
+             />
+             <CheckboxOption 
+                label="User managed" 
+                checked={isSelected("emailStatus", "User managed")} 
+                onChange={() => handleMultiSelect("emailStatus", "User managed")}
+             />
+             <CheckboxOption 
+                label="Unavailable" 
+                checked={isSelected("emailStatus", "Unavailable")} 
+                onChange={() => handleMultiSelect("emailStatus", "Unavailable")}
+             />
+          </div>
         </FilterSection>
 
-        <FilterSection
-          title="Job Titles"
-          expanded={expanded.jobTitles}
-          onToggle={() => toggle("jobTitles")}
-        >
+        {/* 4. Job Titles */}
+        <FilterSection title="Job Titles" expanded={expanded.jobTitles} onToggle={() => toggle("jobTitles")}>
           <input
-            placeholder="Search job titles"
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-          />
+              placeholder="e.g. Manager, Director"
+              className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-xs focus:border-blue-500 focus:outline-none"
+              value={filters?.jobTitle || ""}
+              onChange={(e) => handleInputChange("jobTitle", e.target.value)}
+            />
         </FilterSection>
 
-        <FilterSection
-          title="People Lookalikes"
-          locked
-          expanded={false}
-          onToggle={() => {}}
-        />
-
-        <FilterSection
-          title="Company"
-          expanded={expanded.company}
-          onToggle={() => toggle("company")}
-        >
-          <input
+        {/* 5. Company */}
+        <FilterSection title="Company" expanded={expanded.company} onToggle={() => toggle("company")}>
+           <input
             placeholder="Enter company names"
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+            className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-xs focus:border-blue-500 focus:outline-none"
+            value={filters?.company || ""}
+            onChange={(e) => handleInputChange("company", e.target.value)}
           />
         </FilterSection>
 
-        <FilterSection
-          title="Education"
-          badge="Beta"
-          badgeColor="green"
-          expanded={expanded.education}
-          onToggle={() => toggle("education")}
-        >
-          <select className="w-full rounded border border-gray-300 px-3 py-2 text-sm">
-            <option>Select school</option>
-          </select>
+        {/* 6. Education */}
+        <FilterSection title="Education" badge="Beta" badgeColor="green" expanded={expanded.education} onToggle={() => toggle("education")}>
+             <input placeholder="School name" className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-xs" />
         </FilterSection>
 
-        <FilterSection
-          title="Location"
-          expanded={expanded.location}
-          onToggle={() => toggle("location")}
-        >
+        {/* 7. Location */}
+        <FilterSection title="Location" expanded={expanded.location} onToggle={() => toggle("location")}>
           <input
             placeholder="City, State, Country"
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+            className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-xs focus:border-blue-500 focus:outline-none"
+            value={filters?.location || ""}
+            onChange={(e) => handleInputChange("location", e.target.value)}
           />
         </FilterSection>
 
-        <FilterSection
-          title="# Employees"
-          expanded={expanded.employees}
+        {/* 8. # Employees (Multi-Select Tags) */}
+        <FilterSection 
+          title="# Employees" 
+          count={filters.employees?.length || 0}
+          expanded={expanded.employees} 
           onToggle={() => toggle("employees")}
         >
-          {["1–10", "11–50", "51–200", "201–500", "500+"].map((r) => (
-            <Checkbox key={r} label={r} />
-          ))}
+          {/* FIXED: No default values. User must click to select. */}
+          <div className="flex flex-wrap gap-1.5 mb-2">
+             {["1-10", "11-50", "51-100", "101-200", "201-500", "500+", "1000+"].map(range => {
+                const active = isSelected("employees", range);
+                return (
+                  <button 
+                    key={range}
+                    onClick={() => handleMultiSelect("employees", range)}
+                    className={`px-2 py-1 rounded text-[11px] font-medium border transition-colors ${
+                      active 
+                        ? "bg-blue-100 border-blue-200 text-blue-700" 
+                        : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {range}
+                  </button>
+                );
+             })}
+          </div>
         </FilterSection>
 
-        <FilterSection
-          title="Industry & Keywords"
-          expanded={expanded.industry}
-          onToggle={() => toggle("industry")}
-        >
-          <input
+        {/* 9. Industry */}
+        <FilterSection title="Industry & Keywords" expanded={expanded.industry} onToggle={() => toggle("industry")}>
+           <input
             placeholder="Search industries"
-            className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+            className="w-full rounded border border-gray-300 px-2.5 py-1.5 text-xs focus:border-blue-500 focus:outline-none"
+            value={filters?.industry || ""}
+            onChange={(e) => handleInputChange("industry", e.target.value)}
           />
-          <p className="mt-2 text-xs text-gray-500 flex gap-1">
-            <AlertTriangle className="w-3 h-3 mt-0.5" />
-            Keywords may slow search
-          </p>
         </FilterSection>
 
-        <FilterSection
-          title="Market Segments"
-          expanded={expanded.market}
-          onToggle={() => toggle("market")}
-        >
-          {["B2B", "B2C", "SaaS", "Fintech"].map((m) => (
-            <Checkbox key={m} label={m} />
-          ))}
-        </FilterSection>
       </div>
-      <div className="sticky bottom-0 z-40 bg-white border-t border-gray-200 px-4 py-3 text-sm">
-        <div className="flex items-center justify-between p-4 border-t border-gray-200 gap-2">
-          {/* Bottom */}
 
-          <button className="flex-1 text-sm text-gray-500 hover:text-gray-900">
+      {/* Footer */}
+      <div className="flex-none bg-white border-t border-gray-200 px-4 py-3 text-xs z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-between gap-3">
+          <button 
+            onClick={() => onFilterChange({ jobTitle: "", company: "", location: "", industry: "", emailStatus: [], employees: [] })}
+            className="text-gray-500 hover:text-gray-900 font-medium px-2 py-1.5 rounded hover:bg-gray-100 transition-colors"
+          >
             Clear all
           </button>
-          <button className="flex-1 text-sm text-blue-600 hover:text-blue-700">
-            More filters
+          <button className="flex-1 text-xs font-semibold text-gray-700 border border-gray-300 rounded px-3 py-2 hover:bg-gray-50 transition-colors shadow-sm">
+            More Filters
           </button>
         </div>
       </div>
@@ -183,54 +212,40 @@ export default function FilterSidebar() {
   );
 }
 
-/* ---------- Components ---------- */
+/* -------------------------------------------------------------------------- */
+/* REUSABLE COMPONENTS                             */
+/* -------------------------------------------------------------------------- */
 
-function FilterSection({
-  title,
-  badge,
-  badgeColor = "gray",
-  locked,
-  expanded,
-  onToggle,
-  children,
-}) {
+function FilterSection({ title, count, badge, badgeColor = "gray", locked, expanded, onToggle, children }) {
   return (
     <div className="border-b border-gray-200">
-      <button
-        onClick={onToggle}
-        className="h-12 w-full px-4 flex items-center justify-between hover:bg-gray-50"
+      <button 
+        onClick={onToggle} 
+        className="min-h-[40px] w-full px-4 py-2.5 flex items-center justify-between hover:bg-gray-50 group transition-colors"
       >
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-900">{title}</span>
-
-          {badge && (
-            <span
-              className={`text-[11px] px-1.5 py-0.5 rounded ${
-                badgeColor === "green"
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-gray-100 text-gray-600"
-              }`}
-            >
-              {badge}
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <div className="relative flex items-center justify-center w-4 h-4">
+             {locked ? <Lock className="w-3 h-3 text-gray-400" /> : <div className={`w-1.5 h-1.5 rounded-full ${expanded ? 'bg-blue-600' : 'bg-gray-400'}`} />}
+          </div>
+          <span className="text-[13px] text-gray-700 font-normal truncate group-hover:text-gray-900">{title}</span>
+          
+          {count > 0 && (
+            <span className="ml-1 flex items-center gap-0.5 bg-white border border-gray-300 rounded-full px-1.5 py-0.5 text-[10px] font-medium text-gray-600 shadow-sm">
+               <X className="w-2.5 h-2.5 text-gray-400" /> {count}
             </span>
           )}
 
-          {locked && <Lock className="w-3 h-3 text-gray-400" />}
+          {badge && (
+            <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${badgeColor === "green" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"}`}>
+              {badge}
+            </span>
+          )}
         </div>
-
-        <ChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform ${
-            expanded ? "rotate-180" : ""
-          }`}
-        />
+        <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
       </button>
-
-      <div
-        className={`overflow-hidden transition-all duration-200 ${
-          expanded ? "max-h-[1500px]" : "max-h-0"
-        }`}
-      >
-        <div className="px-4 pb-4 space-y-3 text-sm text-gray-700">
+      
+      <div className={`overflow-hidden transition-all duration-200 ease-in-out ${expanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="px-4 pb-4 pt-1 pl-10 space-y-2">
           {children}
         </div>
       </div>
@@ -240,31 +255,24 @@ function FilterSection({
 
 function StatBox({ label, value, active }) {
   return (
-    <div
-      className={`flex-1 rounded px-3 py-2 ${
-        active ? "bg-blue-50" : "bg-gray-50"
-      }`}
-    >
-      <p className="text-[10px] uppercase text-gray-500">{label}</p>
-      <p className="text-lg font-semibold text-gray-900">{value}</p>
+    <div className={`flex-1 rounded-md px-2 py-1.5 text-center cursor-pointer transition-all border ${active ? "bg-blue-50 border-blue-200 shadow-sm" : "hover:bg-gray-50 border-transparent"}`}>
+      <p className={`text-[11px] font-medium ${active ? "text-blue-600" : "text-gray-500"}`}>{label}</p>
+      <p className={`text-xs font-bold mt-0.5 ${active ? "text-blue-700" : "text-gray-700"}`}>{value}</p>
     </div>
   );
 }
 
-function Group({ title, children }) {
-  return (
-    <div>
-      <p className="text-xs text-gray-500 mb-1">{title}</p>
-      <div className="space-y-2">{children}</div>
-    </div>
-  );
-}
-
-function Checkbox({ label, color = "text-gray-700" }) {
-  return (
-    <label className="flex items-center gap-2 text-sm cursor-pointer">
-      <input type="checkbox" className="w-4 h-4" />
-      <span className={color}>{label}</span>
-    </label>
-  );
+// FIXED: Functional Checkbox that accepts onChange
+function CheckboxOption({ label, checked, onChange }) {
+    return (
+        <label className="flex items-center gap-2 cursor-pointer group select-none">
+            <input 
+              type="checkbox" 
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer" 
+              checked={!!checked} 
+              onChange={onChange} 
+            />
+            <span className="text-xs text-gray-600 group-hover:text-gray-900">{label}</span>
+        </label>
+    );
 }
