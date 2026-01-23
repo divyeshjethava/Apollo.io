@@ -1,6 +1,8 @@
 import React from 'react';
 // Import icons from lucide-react (adjust if your icons are different)
 import { RefreshCw, Users, Timer, DatabaseZap ,Cloud , Network , Sparkle } from 'lucide-react';
+import hubspotlogo from "../../../assets/hubspot.png"
+import salseforcelogo from "../../../assets/salesforce.png"
 
 
 export default function CrmBody() {
@@ -14,10 +16,10 @@ export default function CrmBody() {
             <RefreshCw size={48} className="text-white" />
           </div>
           {/* Top-right sparkle */}
-          <Sparkle className='text-amber-400 absolute top-0 right-1/2 translate-x-17 -translate-y-5 w-7 h-7 rounded-full animate-pulse'/>
+          <Sparkle className='text-blue-600 absolute top-0 right-1/2 translate-x-17 -translate-y-5 w-7 h-7 rounded-full animate-pulse'/>
 
           {/* Bottom-left sparkle */}
-          <Sparkle className='text-amber-400 absolute bottom-0 left-1/2 -translate-x-17 translate-y-5 w-7 h-7 rounded-full animate-pulse'/>
+          <Sparkle className='text-blue-600 absolute bottom-0 left-1/2 -translate-x-17 translate-y-5 w-7 h-7 rounded-full animate-pulse'/>
           
         </div>
 
@@ -32,12 +34,14 @@ export default function CrmBody() {
 
         {/* Connect Buttons */}
         <div className="flex gap-4 justify-center">
-          <button className="px-6 py-3 bg-yellow-400 text-gray-900 font-semibold rounded-lg hover:bg-yellow-500 transition-colors flex items-center gap-2">
-            <Network />
+          <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2">
+            <img src={hubspotlogo} alt="HubSpot Logo" className="w-5 h-5 object-contain" // Adjust w-5 h-5 to fit your button size
+            />
             Connect HubSpot
           </button>
-          <button className="px-6 py-3 bg-yellow-400 text-gray-900 font-semibold rounded-lg hover:bg-yellow-500 transition-colors flex items-center gap-2">
-             <Cloud/>
+          <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2">
+             <img src={salseforcelogo} alt="HubSpot Logo" className="w-5 h-5 object-contain" // Adjust w-5 h-5 to fit your button size
+            />
             Connect Salesforce
           </button>
         </div>

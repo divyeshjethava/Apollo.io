@@ -2,15 +2,51 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
 import logo from "../assets/logo.jpg";
 
 export default function Signup() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(""); // For showing error messages
+  
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
   });
+
+  // --- NEW: Handle Form Submission ---
+  const handleSignup = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:4000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
+
+      // Success!
+      // Optional: Store token in localStorage if you want to auto-login
+      // localStorage.setItem("token", data.token);
+      
+      alert("Account created successfully!");
+      navigate("/login"); // Redirect to login page
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-300 flex flex-col">
@@ -44,6 +80,13 @@ export default function Signup() {
               platform.
             </p>
 
+            {/* Error Message Display */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded border border-red-200">
+                {error}
+              </div>
+            )}
+
             {/* Form */}
             <div className="space-y-4">
               <input
@@ -70,8 +113,12 @@ export default function Signup() {
                 className="w-full px-3 py-2 text-sm border border-gray-500 rounded focus:outline-none focus:ring-2 focus:ring-black"
               />
 
-              <button className="w-full px-6 py-2 bg-black text-white text-sm font-semibold rounded hover:bg-gray-800 transition">
-                Create Account
+              <button 
+                onClick={handleSignup}
+                disabled={loading}
+                className="w-full px-6 py-2 bg-black text-white text-sm font-semibold rounded hover:bg-gray-800 transition disabled:opacity-50"
+              >
+                {loading ? "Creating Account..." : "Create Account"}
               </button>
             </div>
 

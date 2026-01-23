@@ -1,36 +1,39 @@
 import {
-  ChevronDown,
   Search,
   Settings,
   Bell,
-  ChevronsRight,
+  LogOut, // Added Logout Icon
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 export default function TopBar({ sidebarOpen, setSidebarOpen }) {
+  const navigate = useNavigate();
+
+  // Get user name from local storage to show correct Initial
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userInitial = user.name ? user.name.charAt(0).toUpperCase() : "U";
+
+  const handleLogout = () => {
+    // 1. Clear auth data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    
+    // 2. Redirect to Login
+    navigate("/login");
+  };
+
   return (
     <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
       {/* Sidebar toggle + logo */}
       <div className="flex">
-        {/* <div
-          className="flex items-center gap-2 cursor-pointer select-none p-1 hover:bg-gray-100 rounded transition-colors"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          <ChevronsRight
-            size={20}
-            className={`${
-              sidebarOpen ? "hidden" : "rotate-0"
-            } transition-transform`}
-          />
-        </div> */}
-
         {!sidebarOpen && (
           <div className="text-lg font-semibold text-gray-900 ml-1">
             Globentix
@@ -49,9 +52,12 @@ export default function TopBar({ sidebarOpen, setSidebarOpen }) {
           />
         </div>
 
+
         <div className="flex items-center gap-4">
-          <button className="p-1 hover:bg-gray-100 rounded transition-colors">
-            <Settings size={20} className="text-gray-600" />
+          <button 
+            onClick={() => navigate("/admin/settings")} 
+            className="p-1 hover:bg-gray-100 rounded transition-colors" >
+              <Settings size={20} className="text-gray-600" />
           </button>
 
           <button className="p-1 hover:bg-gray-100 rounded transition-colors relative">
@@ -63,15 +69,21 @@ export default function TopBar({ sidebarOpen, setSidebarOpen }) {
           <DropdownMenu>
             <DropdownMenuTrigger className="outline-none">
               <div className="p-2 hover:bg-gray-100 rounded-full cursor-pointer transition-colors">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                  D
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold select-none">
+                  {userInitial}
                 </div>
               </div>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem asChild>
-                <Link to="/login">Login</Link>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={handleLogout} 
+                className="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -17,7 +17,7 @@ const DROPDOWN_OPTIONS = {
   ],
   rating: ["Acquired", "Active", "Market Failed", "Project Cancelled", "Shut Down"],
   countries: ["India", "USA", "UK", "Australia"],
-  salutation: ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."], // Moved here for consistency
+  salutation: ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."],
 };
 
 // --- 2. Location Logic ---
@@ -51,6 +51,24 @@ export default function CreateLeadView() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   
+  // --- NEW: State for Lead Owner Name ---
+  const [ownerName, setOwnerName] = useState("Current User"); 
+
+  // --- NEW: Effect to get Logged In User ---
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const userObj = JSON.parse(storedUser);
+        if (userObj.name) {
+          setOwnerName(userObj.name);
+        }
+      } catch (error) {
+        console.error("Error parsing user data", error);
+      }
+    }
+  }, []);
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -61,14 +79,11 @@ export default function CreateLeadView() {
     website: "",
     title: "",
     fax: "",
-    
-    // Dropdowns (Initialize with "None" or empty string consistently)
-    salutation: "None", // FIXED: Added this so dropdown starts at "None"
+    salutation: "None",
     leadSource: "None",
     leadStatus: "None",
     industry: "None",
     rating: "None",
-    
     revenue: "",
     employees: "",
     country: "None",
@@ -128,9 +143,15 @@ export default function CreateLeadView() {
     try {
       setLoading(true);
       const dataToSend = new FormData();
+      
+      // Append form fields
       Object.keys(formData).forEach((key) => {
         dataToSend.append(key, formData[key]);
       });
+      
+      // Append the real owner name we fetched
+      dataToSend.append("owner", ownerName); 
+
       if (selectedFile) {
         dataToSend.append("leadImage", selectedFile);
       }
@@ -155,8 +176,6 @@ export default function CreateLeadView() {
   };
 
   return (
-    // FIXED: Changed h-screen to h-full so it fits in parent container
-    // Removed fixed background color to blend with parent, or keep if parent has transparent bg
     <div className="h-full flex flex-col bg-[#f5f7fb]">
       
       {/* Top Bar */}
@@ -180,7 +199,7 @@ export default function CreateLeadView() {
         </div>
       </div>
 
-      {/* Form Body - Scrollable Area */}
+      {/* Form Body */}
       <div className="flex-1 bg-white overflow-y-auto custom-scrollbar">
         <div className="bg-white p-8 max-w-6xl mx-auto">
           
@@ -208,11 +227,13 @@ export default function CreateLeadView() {
           {/* Lead Info */}
           <h2 className="text-sm font-bold text-gray-800 mb-6 pb-2 border-b border-gray-100">Lead Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-10">
-            <Input label="Lead Owner" value="Current User" readOnly />
+            
+            {/* UPDATED FIELD: Display dynamic owner name */}
+            <Input label="Lead Owner" value={ownerName} readOnly />
+            
             <Input label="Company" name="company" value={formData.company} onChange={handleChange} required />
             
             <div className="flex gap-3">
-              {/* FIXED: Salutation dropdown now correctly bound to state */}
               <Select
                 label="Salutation"
                 name="salutation"
@@ -273,7 +294,7 @@ export default function CreateLeadView() {
   );
 }
 
-// --- Reusable Components (FIXED Select Logic) ---
+// --- Reusable Components ---
 
 const Input = ({ label, required, prefix, type = "text", name, value, onChange, readOnly, placeholder, className = "" }) => (
   <div className={`flex flex-col ${className}`}>
@@ -301,17 +322,14 @@ const Select = ({ label, options = [], name, value, onChange, width = "w-full", 
     <div className="relative">
       <select
         name={name}
-        value={value || "None"} // Ensures controlled input doesn't break
+        value={value || "None"}
         onChange={onChange}
         disabled={disabled}
         className={`w-full border rounded px-3 py-2 text-sm outline-none appearance-none transition-all ${
           disabled ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed" : "bg-white border-gray-300 text-gray-700 hover:border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         }`}
       >
-        {/* The Default "None" Option */}
         <option value="None">-- None --</option>
-        
-        {/* Map other options */}
         {options.map((opt) => (
           <option key={opt} value={opt}>{opt}</option>
         ))}

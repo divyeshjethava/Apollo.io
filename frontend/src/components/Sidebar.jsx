@@ -225,7 +225,7 @@ export default function Sidebar({
         {/* Bottom */}
         {isOpen && (
           <div className="px-2">
-            <button className="w-full flex items-center gap-2 px-3 py-2 rounded text-sm bg-yellow-400 text-gray-900 font-semibold hover:bg-yellow-500 mb-2">
+            <button className="w-full flex items-center gap-2 px-3 py-2 rounded text-sm bg-blue-600 text-white font-semibold hover:bg-blue-700 mb-2">
               <Sparkles size={16} />
               Upgrade
             </button>

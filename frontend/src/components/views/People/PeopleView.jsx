@@ -33,7 +33,7 @@ export default function PeopleView() {
                 <span className="text-gray-500">Search people</span>
               </div>
               <button
-                className="flex items-center gap-2 px-3 py-1.5 border rounded text-sm cursor-pointer hover:bg-gray-50"
+                className="flex items-center gap-2 px-3 py-1.5 border rounded text-sm cursor-pointer bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={() => navigate("/people/create")}
               >
                 Create lead
