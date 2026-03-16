@@ -13,7 +13,6 @@ import { useState } from "react";
 import "./App.css";
 import Emails from "./components/views/Engage/Emails/Emails";
 import Calls from "./components/views/Engage/Call/Calls";
-
 import UserTeam from "./components/views/AdminSettingViews/UserTeam";
 import SystemActivity from "./components/views/AdminSettingViews/SystemActivity";
 import Security from "./components/views/AdminSettingViews/Security";
@@ -21,13 +20,12 @@ import PlanOverview from "./components/views/AdminSettingViews/PlanOverview";
 import Integrations from "./components/views/AdminSettingViews/Integrations";
 import AdminSettings from "./components/views/AdminSetting";
 import AllSetting from "./components/views/AdminSettingViews/AllSetting";
-
 import Meetings from "./components/views/WinDeals/Meetings/Meetings";
 import Conversations from "./components/views/WinDeals/Conversations/Conversations";
 import DealsOverview from "./components/views/WinDeals/Deals/Overview";
 import CreateLeadView from "./components/views/People/CreateLeadView";
-
 import ProtectedRoute from "./components/ProtectedRoute";
+import PersonPage from "./components/views/People/PersonPage";
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -39,7 +37,8 @@ export default function App() {
 
   // --- FIX IS HERE ---
   // Hide Navbar for BOTH Login AND Signup pages
-  const showNavbar = location.pathname !== "/login" && location.pathname !== "/signup";
+  const showNavbar =
+    location.pathname !== "/login" && location.pathname !== "/signup";
 
   const handleSidebarNavigation = (viewName) => {
     switch (viewName.toLowerCase()) {
@@ -96,25 +95,25 @@ export default function App() {
           currentView={currentPath}
         />
       )}
-      
+
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* TopBar is hidden on Login/Signup */}
         {showNavbar && (
           <TopBar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         )}
-        
+
         <main className="flex-1 overflow-auto">
           <Routes>
-
             {/* These routes will now be full screen because showNavbar is false */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 
-            <Route element={<ProtectedRoute/>}>
+            <Route element={<ProtectedRoute />}>
               <Route path="/" element={<WelcomeView />} />
               <Route path="/data-enrichment" element={<DataEnrichmentView />} />
               <Route path="/lists" element={<MyListsView />} />
               <Route path="/people" element={<PeopleView />} />
+              <Route path="/people/:id" element={<PersonPage />} />
               <Route path="/people/create" element={<CreateLeadView />} />
               <Route path="/companies" element={<CompaniesView />} />
               <Route path="/sequence" element={<Sequence />} />
@@ -124,12 +123,15 @@ export default function App() {
               <Route path="/conversations" element={<Conversations />} />
               <Route path="/deals" element={<DealsOverview />} />
               <Route path="/admin/users" element={<UserTeam />} />
-              <Route path="/admin/system-activity" element={<SystemActivity />} />
+              <Route
+                path="/admin/system-activity"
+                element={<SystemActivity />}
+              />
               <Route path="/admin/security" element={<Security />} />
               <Route path="/admin/plan-overview" element={<PlanOverview />} />
               <Route path="/admin/integrations" element={<Integrations />} />
               <Route path="/admin/settings" element={<AllSetting />} />
-              <Route path="*" element={<PeopleView />} />         
+              <Route path="*" element={<PeopleView />} />
             </Route>
           </Routes>
         </main>

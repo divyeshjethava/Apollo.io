@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
-// --- 1. Static Data for Dropdowns ---
 const DROPDOWN_OPTIONS = {
   leadSource: [
     "Advertisement",
@@ -12,15 +11,6 @@ const DROPDOWN_OPTIONS = {
     "Web",
     "Word of mouth",
   ],
-  leadStatus: [
-    "Attempted to Contact",
-    "Contacted",
-    "Future Lead",
-    "Junk Lead",
-    "Lost Lead",
-    "Not Contacted",
-    "Pre-Qualified",
-  ],
   industry: [
     "Technology",
     "Telecommunications",
@@ -30,19 +20,11 @@ const DROPDOWN_OPTIONS = {
     "Manufacturing",
     "Retail",
     "Healthcare",
-  ],
-  rating: [
-    "Acquired",
-    "Active",
-    "Market Failed",
-    "Project Cancelled",
-    "Shut Down",
+    "Government Administration",
   ],
   countries: ["India", "USA", "UK", "Australia"],
-  salutation: ["Mr.", "Ms.", "Mrs.", "Dr.", "Prof."],
 };
 
-// --- 2. Location Logic ---
 const STATE_MAPPING = {
   India: [
     "Delhi",
@@ -53,267 +35,212 @@ const STATE_MAPPING = {
     "Telangana",
   ],
   USA: ["California", "New York", "Texas", "Florida", "Washington"],
-  UK: ["England", "Scotland", "Wales", "Northern Ireland"],
+  UK: ["England", "Scotland", "Wales"],
   Australia: ["New South Wales", "Victoria", "Queensland"],
-};
-
-// --- 3. Simulated API ---
-const checkPincode = async (pincode) => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const database = {
-    110001: { city: "New Delhi", state: "Delhi", country: "India" },
-    400001: { city: "Mumbai", state: "Maharashtra", country: "India" },
-    560001: { city: "Bengaluru", state: "Karnataka", country: "India" },
-    600001: { city: "Chennai", state: "Tamil Nadu", country: "India" },
-    10001: { city: "New York", state: "New York", country: "USA" },
-    90001: { city: "Los Angeles", state: "California", country: "USA" },
-  };
-  return database[pincode] || null;
 };
 
 export default function CreateLeadView() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  // State
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  // --- NEW: State for Lead Owner Name ---
   const [ownerName, setOwnerName] = useState("Current User");
 
-  // --- NEW: Effect to get Logged In User ---
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+
     if (storedUser) {
-      try {
-        const userObj = JSON.parse(storedUser);
-        if (userObj.name) {
-          setOwnerName(userObj.name);
-        }
-      } catch (error) {
-        console.error("Error parsing user data", error);
-      }
+      const user = JSON.parse(storedUser);
+      setOwnerName(user.name || "Current User");
     }
   }, []);
 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    company: "",
+    title: "",
+    seniority: "",
     email: "",
     phone: "",
-    mobile: "",
+    // mobile: "",
+    linkedin: "",
+    facebook: "",
+    twitter: "",
+
+    company: "",
     website: "",
-    title: "",
-    fax: "",
-    salutation: "None",
-    leadSource: "None",
-    leadStatus: "None",
+    companyPhone: "",
+    companyLinkedin: "",
     industry: "None",
-    rating: "None",
-    revenue: "",
     employees: "",
-    country: "None",
-    state: "None",
-    city: "",
-    pincode: "",
-    street: "",
+    revenue: "",
+
     houseNo: "",
+    street: "",
+    city: "",
+    state: "None",
+    country: "None",
+    pincode: "",
+
     description: "",
   });
 
   const availableStates = STATE_MAPPING[formData.country] || [];
 
-  // Handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleCountryChange = (e) => {
-    const newCountry = e.target.value;
+    const country = e.target.value;
+
     setFormData((prev) => ({
       ...prev,
-      country: newCountry,
+      country,
       state: "None",
     }));
   };
 
-  const handlePincodeChange = async (e) => {
-    const code = e.target.value;
-    setFormData((prev) => ({ ...prev, pincode: code }));
-    if (code.length >= 5) {
-      setLoading(true);
-      const data = await checkPincode(code);
-      setLoading(false);
-      if (data) {
-        setFormData((prev) => ({
-          ...prev,
-          city: data.city,
-          state: data.state,
-          country: data.country,
-        }));
-      }
-    }
-  };
-
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
+
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setImagePreview(imageUrl);
+      setImagePreview(URL.createObjectURL(file));
       setSelectedFile(file);
     }
   };
 
   const handleSubmit = async () => {
     try {
-      setLoading(true);
-      const dataToSend = new FormData();
+      const form = new FormData();
 
-      // Append form fields
       Object.keys(formData).forEach((key) => {
-        dataToSend.append(key, formData[key]);
+        form.append(key, formData[key]);
       });
 
-      // Append the real owner name we fetched
-      dataToSend.append("owner", ownerName);
+      form.append("owner", ownerName);
 
       if (selectedFile) {
-        dataToSend.append("leadImage", selectedFile);
+        form.append("leadImage", selectedFile);
       }
 
-      const response = await fetch("http://localhost:4000/api/leads", {
+      const res = await fetch("http://localhost:4000/api/leads", {
         method: "POST",
-        body: dataToSend,
+        body: form,
       });
 
-      if (response.ok) {
-        alert("Lead created successfully!");
+      if (res.ok) {
+        alert("Lead Created Successfully");
         navigate(-1);
       } else {
         alert("Error creating lead");
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("Server error");
-    } finally {
-      setLoading(false);
+      console.error(error);
+      alert("Server Error");
     }
   };
 
   return (
-    <div className="h-full flex flex-col bg-[#f5f7fb]">
+    <div className="flex flex-col h-full bg-[#f5f7fb]">
       {/* Top Bar */}
-      <div className="flex-none flex items-center justify-between px-6 py-4 border-b bg-white shadow-sm z-10">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Create Lead</h1>
-          <span className="text-xs font-medium text-blue-600 cursor-pointer hover:underline">
-            Edit Page Layout
-          </span>
-        </div>
+
+      <div className="flex items-center justify-between px-6 py-4 bg-white border-b">
+        <h1 className="text-xl font-semibold text-gray-800">Create Lead</h1>
+
         <div className="flex gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 border border-gray-300 rounded text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 transition"
+            className="px-4 py-2 border rounded text-sm"
           >
             Cancel
           </button>
+
           <button
-            className="px-6 py-2 rounded text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition"
             onClick={handleSubmit}
+            className="px-6 py-2 bg-blue-600 text-white rounded text-sm"
           >
             Save
           </button>
         </div>
       </div>
 
-      {/* Form Body */}
-      <div className="flex-1 bg-white overflow-y-auto custom-scrollbar">
-        <div className="bg-white p-8 max-w-6xl mx-auto">
-          {/* Image Upload */}
-          <div className="mb-10 flex items-center gap-6">
-            <div className="relative group">
-              <h2 className="text-xs font-bold uppercase text-gray-500 mb-2 tracking-wider">
-                Lead Image
-              </h2>
-              <div
-                onClick={() => fileInputRef.current.click()}
-                className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition relative overflow-hidden bg-gray-50"
-              >
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="text-center">
-                    <span className="text-3xl text-gray-400">👤</span>
-                    <p className="text-[10px] text-gray-500 mt-1 font-medium">
-                      Upload
-                    </p>
-                  </div>
-                )}
-              </div>
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
+      {/* Form */}
+
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-[1100px] mx-auto space-y-6">
+          {/* Image */}
+
+          <Section title="Lead Image">
+            <div
+              onClick={() => fileInputRef.current.click()}
+              className="w-24 h-24 border-2 border-dashed flex items-center justify-center rounded cursor-pointer"
+            >
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  className="w-full h-full object-cover rounded"
+                />
+              ) : (
+                "Upload"
+              )}
             </div>
-          </div>
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleImageUpload}
+              accept="image/*"
+            />
+          </Section>
 
           {/* Lead Info */}
-          <h2 className="text-sm font-bold text-gray-800 mb-6 pb-2 border-b border-gray-100">
-            Lead Information
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-10">
-            {/* UPDATED FIELD: Display dynamic owner name */}
+
+          <Section title="Lead Information">
             <Input label="Lead Owner" value={ownerName} readOnly />
 
             <Input
-              label="Company"
-              name="company"
-              value={formData.company}
+              label="First Name"
+              name="firstName"
+              value={formData.firstName}
               onChange={handleChange}
-              required
             />
-
-            <div className="flex gap-3">
-              <Input
-                label="First Name"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className="flex-1"
-              />
-            </div>
 
             <Input
               label="Last Name"
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
-              required
             />
+
             <Input
               label="Title"
               name="title"
               value={formData.title}
               onChange={handleChange}
             />
+
+            <Input
+              label="Seniority"
+              name="seniority"
+              value={formData.seniority}
+              onChange={handleChange}
+            />
+
             <Input
               label="Email"
               name="email"
-              type="email"
               value={formData.email}
               onChange={handleChange}
             />
+
             <Input
               label="Phone"
               name="phone"
@@ -321,12 +248,24 @@ export default function CreateLeadView() {
               onChange={handleChange}
             />
 
-            <Input
+            {/* <Input
               label="Mobile"
               name="mobile"
               value={formData.mobile}
               onChange={handleChange}
+            /> */}
+          </Section>
+
+          {/* Company */}
+
+          <Section title="Company Information">
+            <Input
+              label="Company"
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
             />
+
             <Input
               label="Website"
               name="website"
@@ -334,85 +273,59 @@ export default function CreateLeadView() {
               onChange={handleChange}
             />
 
-            <Select
-              label="Lead Source"
-              name="leadSource"
-              options={DROPDOWN_OPTIONS.leadSource}
-              value={formData.leadSource}
+            <Input
+              label="Company Phone"
+              name="companyPhone"
+              value={formData.companyPhone}
               onChange={handleChange}
             />
-            <Select
-              label="Lead Status"
-              name="leadStatus"
-              options={DROPDOWN_OPTIONS.leadStatus}
-              value={formData.leadStatus}
+
+            <Input
+              label="Company LinkedIn"
+              name="companyLinkedin"
+              value={formData.companyLinkedin}
               onChange={handleChange}
             />
+
             <Select
               label="Industry"
               name="industry"
-              options={DROPDOWN_OPTIONS.industry}
               value={formData.industry}
+              options={DROPDOWN_OPTIONS.industry}
               onChange={handleChange}
             />
 
             <Input
-              label="No. of Employees"
+              label="Employees"
               name="employees"
-              type="number"
               value={formData.employees}
               onChange={handleChange}
             />
+
             <Input
               label="Annual Revenue"
               name="revenue"
-              type="number"
-              prefix="Rs."
               value={formData.revenue}
               onChange={handleChange}
             />
-            <Select
-              label="Rating"
-              name="rating"
-              options={DROPDOWN_OPTIONS.rating}
-              value={formData.rating}
-              onChange={handleChange}
-            />
-          </div>
+          </Section>
 
-          {/* Address Info */}
-          <h2 className="text-sm font-bold text-gray-800 mb-6 pb-2 border-b border-gray-100">
-            Address Information
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-10">
-            <Select
-              label="Country"
-              name="country"
-              options={DROPDOWN_OPTIONS.countries}
-              value={formData.country}
-              onChange={handleCountryChange}
-            />
+          {/* Address */}
+
+          <Section title="Address Information">
             <Input
-              label="Flat / House No."
+              label="House No"
               name="houseNo"
               value={formData.houseNo}
               onChange={handleChange}
             />
 
-            <div className="relative">
-              <Input
-                label="Zip Code"
-                name="pincode"
-                value={formData.pincode}
-                onChange={handlePincodeChange}
-                placeholder="e.g. 110001"
-              />
-              {loading && (
-                <span className="absolute right-0 top-0 text-xs text-blue-600 font-medium animate-pulse mt-1">
-                  Fetching...
-                </span>
-              )}
-            </div>
+            <Input
+              label="Street"
+              name="street"
+              value={formData.street}
+              onChange={handleChange}
+            />
 
             <Input
               label="City"
@@ -420,129 +333,121 @@ export default function CreateLeadView() {
               value={formData.city}
               onChange={handleChange}
             />
+
+            <Select
+              label="Country"
+              name="country"
+              value={formData.country}
+              options={DROPDOWN_OPTIONS.countries}
+              onChange={handleCountryChange}
+            />
+
             <Select
               label="State"
               name="state"
-              options={availableStates}
               value={formData.state}
+              options={availableStates}
               onChange={handleChange}
-              disabled={availableStates.length === 0}
             />
+
             <Input
-              label="Street Address"
-              name="street"
-              value={formData.street}
+              label="Zip Code"
+              name="pincode"
+              value={formData.pincode}
               onChange={handleChange}
             />
-          </div>
+          </Section>
+
+          {/* Social */}
+
+          <Section title="Social Profiles">
+            <Input
+              label="LinkedIn"
+              name="linkedin"
+              value={formData.linkedin}
+              onChange={handleChange}
+            />
+
+            <Input
+              label="Facebook"
+              name="facebook"
+              value={formData.facebook}
+              onChange={handleChange}
+            />
+
+            <Input
+              label="Twitter"
+              name="twitter"
+              value={formData.twitter}
+              onChange={handleChange}
+            />
+          </Section>
 
           {/* Description */}
-          <h2 className="text-sm font-bold text-gray-800 mb-6 pb-2 border-b border-gray-100">
-            Description
-          </h2>
-          <textarea
-            className="w-full border border-gray-300 rounded-md px-4 py-3 text-sm focus:border-blue-500 outline-none resize-y min-h-[120px]"
-            rows={4}
-            placeholder="Additional details..."
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-          />
+
+          <Section title="Description">
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full border rounded p-3"
+            />
+          </Section>
         </div>
       </div>
     </div>
   );
 }
 
-// --- Reusable Components ---
+/* SECTION */
 
-const Input = ({
-  label,
-  required,
-  prefix,
-  type = "text",
-  name,
-  value,
-  onChange,
-  readOnly,
-  placeholder,
-  className = "",
-}) => (
-  <div className={`flex flex-col ${className}`}>
-    <label className="text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <div
-      className={`flex items-center border rounded px-3 transition-colors ${readOnly ? "bg-gray-50 border-gray-200" : "bg-white border-gray-300 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500"}`}
-    >
-      {prefix && (
-        <span className="text-gray-500 text-sm mr-2 font-medium border-r pr-2">
-          {prefix}
-        </span>
-      )}
-      <input
-        type={type}
-        name={name}
-        value={value || ""}
-        onChange={onChange}
-        readOnly={readOnly}
-        placeholder={placeholder}
-        className={`w-full py-2 outline-none text-sm text-gray-800 placeholder-gray-400 ${readOnly ? "bg-transparent text-gray-500 cursor-default" : ""}`}
-      />
+const Section = ({ title, children }) => (
+  <div className="bg-white border rounded-lg shadow-sm p-6">
+    <h2 className="text-sm font-semibold text-gray-700 border-b pb-2 mb-6">
+      {title}
+    </h2>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+      {children}
     </div>
   </div>
 );
 
-const Select = ({
-  label,
-  options = [],
-  name,
-  value,
-  onChange,
-  width = "w-full",
-  disabled = false,
-}) => (
-  <div className={`flex flex-col ${width}`}>
-    <label className="text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
-      {label}
-    </label>
-    <div className="relative">
-      <select
-        name={name}
-        value={value || "None"}
-        onChange={onChange}
-        disabled={disabled}
-        className={`w-full border rounded px-3 py-2 text-sm outline-none appearance-none transition-all ${
-          disabled
-            ? "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-            : "bg-white border-gray-300 text-gray-700 hover:border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-        }`}
-      >
-        <option value="None">-- None --</option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
+/* INPUT */
 
-      {!disabled && (
-        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-          <svg
-            className="w-4 h-4 text-gray-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </div>
-      )}
-    </div>
+const Input = ({ label, name, value, onChange, readOnly }) => (
+  <div className="flex flex-col">
+    <label className="text-xs font-semibold text-gray-500 mb-1">{label}</label>
+
+    <input
+      name={name}
+      value={value || ""}
+      onChange={onChange}
+      readOnly={readOnly}
+      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+    />
+  </div>
+);
+
+/* SELECT */
+
+const Select = ({ label, name, options = [], value, onChange }) => (
+  <div className="flex flex-col">
+    <label className="text-xs font-semibold text-gray-500 mb-1">{label}</label>
+
+    <select
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+    >
+      <option value="None">-- None --</option>
+
+      {options.map((opt) => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
   </div>
 );
